@@ -8,10 +8,13 @@ import com.alexcarbonell.domain.usecase.GetCharactersUseCase
 import com.alexcarbonell.rickandmorty.ui.common.base.BaseViewModel
 import com.alexcarbonell.rickandmorty.ui.main.adapter.MainAdapterItem
 import com.alexcarbonell.rickandmorty.ui.main.adapter.toMainAdapterItem
+import kotlinx.coroutines.flow.MutableStateFlow
 
 class MainViewModel(
     private val getCharactersUseCase: GetCharactersUseCase
 ) : BaseViewModel<MainViewModel.ViewState, MainViewModel.ViewEffect, MainViewModel.ViewIntent>() {
+
+    override val _viewState: MutableStateFlow<ViewState> = MutableStateFlow(ViewState.Loading)
 
     private val charactersList = ArrayList<CharacterDomain>()
 
@@ -30,7 +33,7 @@ class MainViewModel(
             }
             is ViewIntent.OnCharacterClicked -> {
                 charactersList.find { it.id == viewIntent.id }?.let { character ->
-                    _viewEffect.postValue(ViewEffect.ShowSnackBar(character.name))
+                    showEvent(ViewEffect.ShowSnackBar(character.name))
                 }
             }
         }
@@ -41,7 +44,7 @@ class MainViewModel(
             charactersPageRequested = true
 
             if (isFirstRequest) {
-                _viewState.postValue(ViewState.Loading)
+                _viewState.value = ViewState.Loading
             } else {
                 _viewState.value = ViewState.Success(
                     mapCharactersToAdapterItems(charactersList.toList(), true)

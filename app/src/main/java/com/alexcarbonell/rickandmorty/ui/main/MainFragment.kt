@@ -4,16 +4,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alexcarbonell.rickandmorty.databinding.FragmentMainBinding
 import com.alexcarbonell.rickandmorty.ui.common.base.BaseFragment
-import com.alexcarbonell.rickandmorty.ui.common.extensions.observe
 import com.alexcarbonell.rickandmorty.ui.common.extensions.onScrolledToBottom
 import com.alexcarbonell.rickandmorty.ui.main.adapter.MainListAdapter
 import com.google.android.material.snackbar.Snackbar
-import org.koin.android.viewmodel.ext.android.viewModel
+import kotlinx.coroutines.flow.collect
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainFragment : BaseFragment<FragmentMainBinding>() {
 
@@ -59,11 +60,15 @@ class MainFragment : BaseFragment<FragmentMainBinding>() {
     }
 
     private fun initObservers() {
-        observe(viewModel.viewState) {
-            setViewState(it)
+        lifecycleScope.launchWhenStarted {
+            viewModel.viewState.collect {
+                setViewState(it)
+            }
         }
-        observe(viewModel.viewEffect) {
-            showViewEffect(it)
+        lifecycleScope.launchWhenStarted {
+            viewModel.viewEffect.collect {
+                showViewEffect(it)
+            }
         }
     }
 
